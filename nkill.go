@@ -3,7 +3,6 @@
 package nkill
 
 import (
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -12,6 +11,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 )
 
 const (
@@ -30,17 +30,7 @@ type Process struct {
 func (p *Process) Kill() error {
 	pid, _ := strconv.Atoi(p.Pid)
 	proc, _ := os.FindProcess(pid)
-	if err := proc.Kill(); err != nil {
-		return err
-	}
-	if ps, err := proc.Wait(); err != nil {
-		return err
-	} else {
-		if ps.Exited() {
-			return nil
-		}
-	}
-	return errors.New("Kill failed!")
+	return proc.Kill()
 }
 
 //  Read the table of tcp connections & remove header
@@ -136,14 +126,20 @@ func getProcessExe(pid string) string {
 
 func KillPort(portToKill int64) {
 	killed := false
-	for _, conn := range netstat(portToKill) {
-		if err := conn.Kill(); err != nil {
-			log.Printf("Kill %s (pid: %s) listening on port %d failed: %s", conn.Name, conn.Pid, conn.Port, err)
-		} else {
-			log.Printf("Killed %s (pid: %s) listening on port %d", conn.Name, conn.Pid, conn.Port)
-			killed = true
+	for {
+		for _, conn := range netstat(portToKill) {
+			if err := conn.Kill(); err != nil {
+				log.Printf("Kill %s (pid: %s) listening on port %d failed: %s", conn.Name, conn.Pid, conn.Port, err)
+			} else {
+				log.Printf("Killed %s (pid: %s) listening on port %d", conn.Name, conn.Pid, conn.Port)
+				killed = true
+			}
 		}
-
+		if len(netstat(portToKill)) == 0 {
+			break
+		} else {
+			time.Sleep(500 * time.Millisecond)
+		}
 	}
 	if !killed {
 		log.Printf("No process found listening on port %d\n", portToKill)
