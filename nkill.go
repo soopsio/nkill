@@ -3,6 +3,7 @@
 package nkill
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -29,7 +30,17 @@ type Process struct {
 func (p *Process) Kill() error {
 	pid, _ := strconv.Atoi(p.Pid)
 	proc, _ := os.FindProcess(pid)
-	return proc.Kill()
+	if err := proc.Kill(); err != nil {
+		return err
+	}
+	if ps, err := proc.Wait(); err != nil {
+		return err
+	} else {
+		if ps.Exited() {
+			return nil
+		}
+	}
+	return errors.New("Kill failed!")
 }
 
 //  Read the table of tcp connections & remove header
@@ -127,7 +138,7 @@ func KillPort(portToKill int64) {
 	killed := false
 	for _, conn := range netstat(portToKill) {
 		if err := conn.Kill(); err != nil {
-			log.Println(err)
+			log.Printf("Kill %s (pid: %s) listening on port %d failed: %s", conn.Name, conn.Pid, conn.Port, err)
 		} else {
 			log.Printf("Killed %s (pid: %s) listening on port %d", conn.Name, conn.Pid, conn.Port)
 			killed = true
