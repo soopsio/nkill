@@ -39,8 +39,7 @@ func netstat(portToKill int64) []Process {
 // as superuser
 func statTCP(portToKill int64, f string) []Process {
 	var processes []Process
-
-	cmd := exec.Command("lsof", "-i", ":"+strconv.Itoa(portToKill))
+	cmd := exec.Command("lsof", "-i", ":"+strconv.FormatInt(portToKill, 10))
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		fmt.Println(err)
@@ -60,7 +59,7 @@ func statTCP(portToKill int64, f string) []Process {
 				if len(s) >= 2 {
 					pid, err := strconv.Atoi(s[1])
 					if err == nil && pid > 0 {
-						proc := process.NewProcess(int32(pid))
+						proc,_ := process.NewProcess(int32(pid))
 						// fmt.Println(os.FindProcess(pid))
 						exe, _ := proc.Exe()
 						state, _ := proc.Status()
