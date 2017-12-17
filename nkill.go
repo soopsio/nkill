@@ -1,5 +1,6 @@
 // Kills all processes listening on the given TCP ports.
 
+// +build linux
 package nkill
 
 import (
