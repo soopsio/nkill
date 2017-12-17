@@ -1,6 +1,6 @@
 // Kills all processes listening on the given TCP ports.
 
-// +build linux
+// +build linux !darwin
 package nkill
 
 import (
