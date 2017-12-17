@@ -47,7 +47,7 @@ func statTCP(portToKill int64, f string) []Process {
 		fmt.Println(err)
 	}
 
-	p := regexp.MustCompile("\\s+")
+	pspace := regexp.MustCompile("\\s+")
 
 	reader := bufio.NewReader(bytes.NewReader(out))
 	for {
@@ -57,7 +57,7 @@ func statTCP(portToKill int64, f string) []Process {
 			// fmt.Println(string(line))
 			if !bytes.HasPrefix(line, []byte("COMMAND")) {
 				// fmt.Println(string(line))
-				s := p.Split(string(line), -1)
+				s := pspace.Split(string(line), -1)
 				if len(s) >= 2 {
 					pid, err := strconv.Atoi(s[1])
 					if err == nil && pid > 0 {
