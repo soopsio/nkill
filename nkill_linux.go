@@ -72,7 +72,7 @@ func pathExists(path string) (bool, error) {
 }
 
 func netstat(portToKill int64) []Process {
-	tcpStats := []Process
+	tcpStats := []Process{}
 	if b,_:=pathExists(PROC_TCP6);b{
 		tcpStats= statTCP(portToKill, PROC_TCP)
 	}
