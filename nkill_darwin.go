@@ -32,7 +32,7 @@ func (p *Process) Kill() error {
 func netstat(portToKill int64) []Process {
 	tcpStats := statTCP(portToKill, "")
 	tcp6Stats := statTCP(portToKill, "")
-	return append(tcpStats, tcp6Stats...)
+	return append(tcpStats, tcp6Stats...) 
 }
 
 // To get pid of all network process running on system, you must run this script
@@ -40,9 +40,11 @@ func netstat(portToKill int64) []Process {
 func statTCP(portToKill int64, f string) []Process {
 	var processes []Process
 	cmd := exec.Command("lsof", "-i", ":"+strconv.FormatInt(portToKill, 10))
+	
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		fmt.Println(err)
+		// fmt.Println("CombinedOutput cmd error from nkill:",err)
+		return processes
 	}
 
 	pspace := regexp.MustCompile("\\s+")
