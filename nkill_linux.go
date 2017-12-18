@@ -60,10 +60,27 @@ func deleteEmpty(s []string) []string {
 	return r
 }
 
+func pathExists(path string) (bool, error) {
+	_, err := os.Stat(path)
+	if err == nil {
+		return true, nil
+	}
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+	return false, err
+}
+
 func netstat(portToKill int64) []Process {
-	tcpStats := statTCP(portToKill, PROC_TCP)
-	tcp6Stats := statTCP(portToKill, PROC_TCP6)
-	return append(tcpStats, tcp6Stats...)
+	tcpStats := []Process
+	if b,_:=pathExists(PROC_TCP6);b{
+		tcpStats= statTCP(portToKill, PROC_TCP)
+	}
+	if b,_:=pathExists(PROC_TCP6);b{
+		tcp6Stats := statTCP(portToKill, PROC_TCP6)
+		return append(tcpStats,tcp6Stats...)
+	}
+	       return tcpStats
 }
 
 // To get pid of all network process running on system, you must run this script
